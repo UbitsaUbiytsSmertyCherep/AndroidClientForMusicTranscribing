@@ -116,7 +116,7 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         InputModeCard(
-                            icon = Icons.Default.AudioFile,
+                            icon = Icons.Default.Call,
                             title = "Upload File",
                             subtitle = "MP3, WAV",
                             modifier = Modifier.weight(1f),
@@ -124,7 +124,7 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
                         )
 
                         InputModeCard(
-                            icon = Icons.Default.Link,
+                            icon = Icons.Default.Check,
                             title = "YouTube",
                             subtitle = "Paste link",
                             modifier = Modifier.weight(1f),
@@ -262,7 +262,7 @@ private fun FileInputSection(
             ) {
                 if (fileName != null) {
                     Icon(
-                        imageVector = Icons.Default.AudioFile,
+                        imageVector = Icons.Default.Call,
                         contentDescription = null,
                         tint = ActiveFontColor,
                         modifier = Modifier.size(48.dp)
@@ -370,7 +370,7 @@ private fun YoutubeInputSection(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = Icons.Default.PlayCircle,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
                     tint = ActiveFontColor,
                     modifier = Modifier.size(56.dp)
@@ -392,7 +392,7 @@ private fun YoutubeInputSection(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                     leadingIcon = {
-                        Icon(Icons.Default.Link, contentDescription = null)
+                        Icon(Icons.Default.Build, contentDescription = null)
                     },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = ActiveFontColor,
@@ -521,10 +521,10 @@ private fun ResultCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 result.key?.let { key ->
-                    InfoChip(icon = Icons.Default.MusicNote, text = key)
+                    InfoChip(icon = Icons.Default.Call, text = key)
                 }
                 result.tempo?.let { tempo ->
-                    InfoChip(icon = Icons.Default.Speed, text = "$tempo BPM")
+                    InfoChip(icon = Icons.Default.Refresh, text = "$tempo BPM")
                 }
             }
         }
@@ -537,7 +537,7 @@ private fun InfoChip(icon: ImageVector, text: String) {
         modifier = Modifier
             .background(ActiveFontColor.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.Center.Vertically
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
@@ -571,7 +571,7 @@ private fun ErrorCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Error,
+                imageVector = Icons.Default.Clear,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(24.dp)

@@ -12,9 +12,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 class MainViewModel : ViewModel() {
 
@@ -121,10 +123,18 @@ class MainViewModel : ViewModel() {
             errorMessage = null
 
             try {
+                val okHttpClient = OkHttpClient.Builder()
+                    .connectTimeout(120, TimeUnit.SECONDS)
+                    .readTimeout(120, TimeUnit.SECONDS)
+                    .writeTimeout(120, TimeUnit.SECONDS)
+                    .build()
+
                 val retrofit = Retrofit.Builder()
                     .baseUrl(baseUrl)
+                    .client(okHttpClient) // Подключаем настроенный клиент
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
+
 
                 val api = retrofit.create(PianoRollApiService::class.java)
 

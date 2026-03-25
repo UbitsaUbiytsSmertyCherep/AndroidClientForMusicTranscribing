@@ -470,64 +470,82 @@ private fun ResultCard(
     result: PianoResponse,
     onDismiss: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = ButtonPressedBack),
-        shape = RoundedCornerShape(20.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+        // Заголовок с информацией
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = ButtonPressedBack),
+            shape = RoundedCornerShape(20.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = ActiveFontColor,
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Success!",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = ActiveFontColor
-                    )
-                    Text(
-                        text = "${result.notes.size} notes detected",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                IconButton(onClick = onDismiss) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = ActiveFontColor,
+                        modifier = Modifier.size(32.dp)
                     )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Success!",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = ActiveFontColor
+                        )
+                        Text(
+                            text = "${result.notes.size} notes detected",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-            // Дополнительная информация
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                result.key?.let { key ->
-                    InfoChip(icon = Icons.Default.Call, text = key)
-                }
-                result.tempo?.let { tempo ->
-                    InfoChip(icon = Icons.Default.Refresh, text = "$tempo BPM")
+                // Дополнительная информация
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    result.key?.let { key ->
+                        InfoChip(icon = Icons.Default.Call, text = key)
+                    }
+                    result.tempo?.let { tempo ->
+                        InfoChip(icon = Icons.Default.Refresh, text = "$tempo BPM")
+                    }
+                    result.timeSignature?.let { ts ->
+                        InfoChip(icon = Icons.Default.Schedule, text = ts)
+                    }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Piano Roll отображение
+        PianoRollView(
+            notes = result.notes,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+        )
     }
 }
 

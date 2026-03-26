@@ -9,6 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -42,6 +45,26 @@ class MainViewModel : ViewModel() {
     var youtubeLink by mutableStateOf("")
         private set
 
+    // Сохранённые транскрипции
+    private var transcriptionsManager: TranscriptionsManager? = null
+
+    private val _savedTranscriptions = MutableStateFlow<List<SavedTranscription>>(emptyList())
+    val savedTranscriptions: StateFlow<List<SavedTranscription>> = _savedTranscriptions.asStateFlow()
+
+    // Выбранная транскрипция для просмотра
+    var selectedTranscription by mutableStateOf<SavedTranscription?>(null)
+        private set
+
+    // Инициализация менеджера транскрипций
+    fun initTranscriptionsManager(context: Context) {
+        transcriptionsManager = TranscriptionsManager(context)
+        viewModelScope.launch {
+            transcriptionsManager?.transcriptionsFlow?.collect { list ->
+                _savedTranscriptions.value = list
+            }
+        }
+    }
+
     fun updateYoutubeLink(link: String) {
         youtubeLink = link
     }
@@ -73,6 +96,7 @@ class MainViewModel : ViewModel() {
 
     fun transcribeFromFile(context: Context, baseUrl: String) {
         val uri = selectedFileUri ?: return
+        val fileName = selectedFileName ?: "Unknown file"
 
         viewModelScope.launch {
             isTranscribing = true
@@ -98,6 +122,19 @@ class MainViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     transcriptionResult = response.body()
                     Log.d("Api", "Notes received: ${transcriptionResult?.notes?.size}")
+
+                    // Сохраняем транскрипцию
+                    transcriptionResult?.let { result ->
+                        val savedTranscription = SavedTranscription(
+                            fileName = fileName,
+                            source = "file",
+                            notes = result.notes,
+                            tempo = result.tempo,
+                            key = result.key,
+                            timeSignature = result.timeSignature
+                        )
+                        transcriptionsManager?.saveTranscription(savedTranscription)
+                    }
                 } else {
                     errorMessage = "Server error: ${response.code()}"
                     Log.e("Api", "Error: ${response.code()}")
@@ -118,6 +155,8 @@ class MainViewModel : ViewModel() {
             return
         }
 
+        val link = youtubeLink
+
         viewModelScope.launch {
             isTranscribing = true
             errorMessage = null
@@ -131,18 +170,31 @@ class MainViewModel : ViewModel() {
 
                 val retrofit = Retrofit.Builder()
                     .baseUrl(baseUrl)
-                    .client(okHttpClient) // Подключаем настроенный клиент
+                    .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
-
                 val api = retrofit.create(PianoRollApiService::class.java)
 
-                val response = api.uploadViaLink(Link_Post(youtubeLink))
+                val response = api.uploadViaLink(Link_Post(link))
 
                 if (response.isSuccessful) {
                     transcriptionResult = response.body()
                     Log.d("Api", "Notes received: ${transcriptionResult?.notes?.size}")
+
+                    // Сохраняем транскрипцию
+                    transcriptionResult?.let { result ->
+                        val savedTranscription = SavedTranscription(
+                            fileName = "YouTube: ${extractYoutubeTitle(link)}",
+                            source = "youtube",
+                            sourceUrl = link,
+                            notes = result.notes,
+                            tempo = result.tempo,
+                            key = result.key,
+                            timeSignature = result.timeSignature
+                        )
+                        transcriptionsManager?.saveTranscription(savedTranscription)
+                    }
                 } else {
                     errorMessage = "Server error: ${response.code()}"
                     Log.e("Api", "Error: ${response.code()}")
@@ -155,6 +207,38 @@ class MainViewModel : ViewModel() {
                 isTranscribing = false
             }
         }
+    }
+
+    // Выбрать транскрипцию для просмотра
+    fun selectTranscription(transcription: SavedTranscription) {
+        selectedTranscription = transcription
+        transcriptionResult = PianoResponse(
+            notes = transcription.notes,
+            chords = emptyList(),
+            tempo = transcription.tempo ?: 120,
+            key = transcription.key ?: "C",
+            timeSignature = transcription.timeSignature ?: "4/4"
+        )
+    }
+
+    // Удалить транскрипцию
+    fun deleteTranscription(id: String) {
+        viewModelScope.launch {
+            transcriptionsManager?.deleteTranscription(id)
+        }
+    }
+
+    // Очистить выбранную транскрипцию
+    fun clearSelectedTranscription() {
+        selectedTranscription = null
+        transcriptionResult = null
+    }
+
+    private fun extractYoutubeTitle(url: String): String {
+        // Простое извлечение ID видео из URL
+        val videoIdRegex = Regex("(?:v=|youtu\\.be/)([a-zA-Z0-9_-]{11})")
+        val match = videoIdRegex.find(url)
+        return match?.groupValues?.get(1) ?: "Video"
     }
 
     fun clearResult() {

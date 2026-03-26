@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import com.example.firstapplication.ui.theme.ActiveFontColor
 import com.example.firstapplication.ui.theme.MenuBack
@@ -126,6 +127,9 @@ fun PianoRollView(
     val horizontalScrollState = rememberScrollState()
     val verticalScrollState = rememberScrollState()
 
+    // Плотность для конвертации px в dp
+    val density = androidx.compose.ui.platform.LocalDensity.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -142,32 +146,52 @@ fun PianoRollView(
             colors = CardDefaults.cardColors(containerColor = MenuBack),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                // Вертикальная ось с названиями нот
-                NoteLabelsColumn(
-                    noteRangeStart = noteRangeStart,
-                    noteRangeEnd = noteRangeEnd
-                )
-
-                // Область с нотами (горизонтальная прокрутка)
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .horizontalScroll(horizontalScrollState)
-                ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // Вертикальная ось с названиями нот (синхронизированная прокрутка)
                     Box(
                         modifier = Modifier
-                            .width(totalWidthPx.dp)
+                            .width(OCTAVE_LABEL_WIDTH_DP.dp)
                             .fillMaxHeight()
-                            .verticalScroll(verticalScrollState)
                     ) {
-                        // Сетка и ноты
-                        PianoRollGrid(
-                            notes = notes,
-                            noteRangeStart = noteRangeStart,
-                            noteRangeEnd = noteRangeEnd,
-                            totalWidthPx = totalWidthPx
-                        )
+                        // Скрываем лишнее при прокрутке
+                        Box(
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        0,
+                                        -verticalScrollState.value
+                                    )
+                                }
+                        ) {
+                            NoteLabelsColumn(
+                                noteRangeStart = noteRangeStart,
+                                noteRangeEnd = noteRangeEnd,
+                                modifier = Modifier.width(OCTAVE_LABEL_WIDTH_DP.dp)
+                            )
+                        }
+                    }
+
+                    // Область с нотами (горизонтальная прокрутка)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .horizontalScroll(horizontalScrollState)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(totalWidthPx.dp)
+                                .fillMaxHeight()
+                                .verticalScroll(verticalScrollState)
+                        ) {
+                            // Сетка и ноты
+                            PianoRollGrid(
+                                notes = notes,
+                                noteRangeStart = noteRangeStart,
+                                noteRangeEnd = noteRangeEnd,
+                                totalWidthPx = totalWidthPx
+                            )
+                        }
                     }
                 }
             }
@@ -255,12 +279,11 @@ private fun StatChip(label: String, value: String) {
 @Composable
 private fun NoteLabelsColumn(
     noteRangeStart: Int,
-    noteRangeEnd: Int
+    noteRangeEnd: Int,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .width(OCTAVE_LABEL_WIDTH_DP.dp)
-            .fillMaxHeight()
+        modifier = modifier
             .background(MenuBack)
     ) {
         // Отрисовываем метки нот от верхней к нижней

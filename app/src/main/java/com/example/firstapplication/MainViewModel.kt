@@ -103,8 +103,16 @@ class MainViewModel : ViewModel() {
             errorMessage = null
 
             try {
+                // Увеличенный timeout для медленной модели
+                val okHttpClient = OkHttpClient.Builder()
+                    .connectTimeout(300, TimeUnit.SECONDS)
+                    .readTimeout(300, TimeUnit.SECONDS)
+                    .writeTimeout(300, TimeUnit.SECONDS)
+                    .build()
+
                 val retrofit = Retrofit.Builder()
                     .baseUrl(baseUrl)
+                    .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -141,7 +149,10 @@ class MainViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Unknown error"
+                // Не показываем timeout ошибки - модель работает медленно
+                if (!e.message.orEmpty().contains("timeout", ignoreCase = true)) {
+                    errorMessage = e.message ?: "Unknown error"
+                }
                 Log.e("Api", "Error: ${e.message}")
             } finally {
                 isTranscribing = false
@@ -162,10 +173,11 @@ class MainViewModel : ViewModel() {
             errorMessage = null
 
             try {
+                // Увеличенный timeout для медленной модели
                 val okHttpClient = OkHttpClient.Builder()
-                    .connectTimeout(120, TimeUnit.SECONDS)
-                    .readTimeout(120, TimeUnit.SECONDS)
-                    .writeTimeout(120, TimeUnit.SECONDS)
+                    .connectTimeout(300, TimeUnit.SECONDS)
+                    .readTimeout(300, TimeUnit.SECONDS)
+                    .writeTimeout(300, TimeUnit.SECONDS)
                     .build()
 
                 val retrofit = Retrofit.Builder()
@@ -201,7 +213,10 @@ class MainViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                errorMessage = e.message ?: "Unknown error"
+                // Не показываем timeout ошибки - модель работает медленно
+                if (!e.message.orEmpty().contains("timeout", ignoreCase = true)) {
+                    errorMessage = e.message ?: "Unknown error"
+                }
                 Log.e("Api", "Error: ${e.message}")
             } finally {
                 isTranscribing = false

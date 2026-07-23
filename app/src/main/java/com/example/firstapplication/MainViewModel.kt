@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import com.example.firstapplication.ServiceLocator
 
 class MainViewModel : ViewModel() {
 
@@ -32,6 +32,7 @@ class MainViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    // Для отображения информации о выбран
     // Для отображения информации о выбранном файле
     var selectedFileName by mutableStateOf<String?>(null)
         private set
@@ -103,20 +104,7 @@ class MainViewModel : ViewModel() {
             errorMessage = null
 
             try {
-                // Увеличенный timeout для медленной модели
-                val okHttpClient = OkHttpClient.Builder()
-                    .connectTimeout(300, TimeUnit.SECONDS)
-                    .readTimeout(300, TimeUnit.SECONDS)
-                    .writeTimeout(300, TimeUnit.SECONDS)
-                    .build()
-
-                val retrofit = Retrofit.Builder()
-                    .baseUrl(baseUrl)
-                    .client(okHttpClient)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-
-                val api = retrofit.create(PianoRollApiService::class.java)
+                val api = ServiceLocator.getApiService()
 
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val fileBytes = inputStream?.readBytes() ?: throw Exception("Cannot read file")
@@ -131,7 +119,6 @@ class MainViewModel : ViewModel() {
                     transcriptionResult = response.body()
                     Log.d("Api", "Notes received: ${transcriptionResult?.notes?.size}")
 
-                    // Сохраняем транскрипцию
                     transcriptionResult?.let { result ->
                         val savedTranscription = SavedTranscription(
                             fileName = fileName,
@@ -173,21 +160,7 @@ class MainViewModel : ViewModel() {
             errorMessage = null
 
             try {
-                // Увеличенный timeout для медленной модели
-                val okHttpClient = OkHttpClient.Builder()
-                    .connectTimeout(300, TimeUnit.SECONDS)
-                    .readTimeout(300, TimeUnit.SECONDS)
-                    .writeTimeout(300, TimeUnit.SECONDS)
-                    .build()
-
-                val retrofit = Retrofit.Builder()
-                    .baseUrl(baseUrl)
-                    .client(okHttpClient)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-
-                val api = retrofit.create(PianoRollApiService::class.java)
-
+                val api = ServiceLocator.getApiService()
                 val response = api.uploadViaLink(Link_Post(link))
 
                 if (response.isSuccessful) {

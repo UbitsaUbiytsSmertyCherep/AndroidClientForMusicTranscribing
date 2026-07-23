@@ -20,5 +20,13 @@ interface PianoRollApiService{
         @Body request: Link_Post
     ): Response<PianoResponse>
 
+    @POST("/login")
+    suspend fun login(
+        @Body request: LoginRequest
+    ): Response<AuthResponse>
 
+    @POST("/register")
+    suspend fun register(
+        @Body request: RegisterRequest
+    ): Response<AuthResponse>
 }

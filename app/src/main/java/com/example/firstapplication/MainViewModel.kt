@@ -32,8 +32,6 @@ class MainViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    // Для отображения информации о выбран
-    // Для отображения информации о выбранном файле
     var selectedFileName by mutableStateOf<String?>(null)
         private set
 
@@ -42,21 +40,17 @@ class MainViewModel : ViewModel() {
 
     private var selectedFileUri: Uri? = null
 
-    // Для YouTube ссылки
     var youtubeLink by mutableStateOf("")
         private set
 
-    // Сохранённые транскрипции
     private var transcriptionsManager: TranscriptionsManager? = null
 
     private val _savedTranscriptions = MutableStateFlow<List<SavedTranscription>>(emptyList())
     val savedTranscriptions: StateFlow<List<SavedTranscription>> = _savedTranscriptions.asStateFlow()
 
-    // Выбранная транскрипция для просмотра
     var selectedTranscription by mutableStateOf<SavedTranscription?>(null)
         private set
 
-    // Инициализация менеджера транскрипций
     fun initTranscriptionsManager(context: Context) {
         transcriptionsManager = TranscriptionsManager(context)
         viewModelScope.launch {
@@ -75,7 +69,6 @@ class MainViewModel : ViewModel() {
         transcriptionResult = null
         errorMessage = null
 
-        // Получаем информацию о файле
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
             val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
@@ -136,7 +129,6 @@ class MainViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                // Не показываем timeout ошибки - модель работает медленно
                 if (!e.message.orEmpty().contains("timeout", ignoreCase = true)) {
                     errorMessage = e.message ?: "Unknown error"
                 }
@@ -167,7 +159,6 @@ class MainViewModel : ViewModel() {
                     transcriptionResult = response.body()
                     Log.d("Api", "Notes received: ${transcriptionResult?.notes?.size}")
 
-                    // Сохраняем транскрипцию
                     transcriptionResult?.let { result ->
                         val savedTranscription = SavedTranscription(
                             fileName = "YouTube: ${extractYoutubeTitle(link)}",
@@ -186,7 +177,6 @@ class MainViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                // Не показываем timeout ошибки - модель работает медленно
                 if (!e.message.orEmpty().contains("timeout", ignoreCase = true)) {
                     errorMessage = e.message ?: "Unknown error"
                 }
@@ -197,7 +187,6 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    // Выбрать транскрипцию для просмотра
     fun selectTranscription(transcription: SavedTranscription) {
         selectedTranscription = transcription
         transcriptionResult = PianoResponse(
@@ -209,21 +198,18 @@ class MainViewModel : ViewModel() {
         )
     }
 
-    // Удалить транскрипцию
     fun deleteTranscription(id: String) {
         viewModelScope.launch {
             transcriptionsManager?.deleteTranscription(id)
         }
     }
 
-    // Очистить выбранную транскрипцию
     fun clearSelectedTranscription() {
         selectedTranscription = null
         transcriptionResult = null
     }
 
     private fun extractYoutubeTitle(url: String): String {
-        // Простое извлечение ID видео из URL
         val videoIdRegex = Regex("(?:v=|youtu\\.be/)([a-zA-Z0-9_-]{11})")
         val match = videoIdRegex.find(url)
         return match?.groupValues?.get(1) ?: "Video"

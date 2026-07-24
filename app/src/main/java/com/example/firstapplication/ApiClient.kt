@@ -10,16 +10,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * Provides a Retrofit service with an interceptor that adds the JWT token to the Authorization header.
- */
 class ApiClient private constructor(
     private val context: Context,
     private val authManager: AuthManager
 ) {
     private val baseUrl by lazy {
-        // In a real app, you might get this from SettingsManager or resources.
-        // For simplicity, we use the same as in MainWindow.
         "http://10.0.2.2:8000"
     }
 
@@ -31,7 +26,6 @@ class ApiClient private constructor(
             .addInterceptor { chain ->
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
-                // Blocking call to get token; acceptable on IO thread.
                 val token = runBlocking { authManager.getToken() }
                 if (token != null) {
                     requestBuilder.header("Authorization", "Bearer $token")

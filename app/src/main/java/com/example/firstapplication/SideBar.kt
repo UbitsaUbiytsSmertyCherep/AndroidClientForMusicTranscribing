@@ -101,7 +101,6 @@ fun SideBar(modifier: Modifier = Modifier){
             }
         ) { padding ->
             Box(modifier = Modifier.padding(padding).background(MenuVERYBack)) {
-                // ПЕРЕКЛЮЧАТЕЛЬ ЭКРАНОВ (как Router в Вебе или Frame в C#)
                 when (currentScreen) {
                     "home" -> MainWindow()
                     "settings" -> InnerScreen()

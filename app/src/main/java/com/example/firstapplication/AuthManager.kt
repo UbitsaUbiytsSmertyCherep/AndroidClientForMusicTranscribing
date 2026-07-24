@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 class AuthManager(private val context: Context) {
 
     private val TOKEN_KEY = stringPreferencesKey("auth_token")
-    private val EXPIRES_AT_KEY = longPreferencesKey("expires_at") // store expiration timestamp (epoch seconds)
+    private val EXPIRES_AT_KEY = longPreferencesKey("expires_at")
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
         val token = preferences[TOKEN_KEY]
@@ -22,17 +22,13 @@ class AuthManager(private val context: Context) {
         if (token != null && expiresAt > now) {
             token
         } else {
-            // token missing or expired
             null
         }
     }
 
     suspend fun saveAuthResponse(authResponse: AuthResponse) {
-        // For simplicity, we'll store token without expiration parsing
-        // In a production app, you'd want to properly parse the JWT exp claim
         context.dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = authResponse.token
-            // Set expiration to 24 hours from now if we don't have JWT parsing
             val expiration = System.currentTimeMillis() / 1000 + (24 * 60 * 60)
             preferences[EXPIRES_AT_KEY] = expiration
         }

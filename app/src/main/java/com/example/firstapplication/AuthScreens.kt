@@ -28,7 +28,6 @@ fun AuthScreen(
     val error by viewModel.error.collectAsState()
     val isAuthenticated by viewModel.isAuthenticated.collectAsState()
 
-    // Notify parent when authentication state changes to true
     LaunchedEffect(isAuthenticated) {
         if (isAuthenticated) {
             onAuthSuccess()
@@ -55,7 +54,6 @@ fun AuthScreen(
                         .padding(bottom = 24.dp)
                 )
 
-                // Simple login/register switch
                 var showLogin by remember { mutableStateOf(true) }
                 Row(
                     horizontalArrangement = Arrangement.Center,

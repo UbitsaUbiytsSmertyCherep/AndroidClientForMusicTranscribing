@@ -35,10 +35,8 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
     val context = LocalContext.current
     val baseUrl = "http://10.0.2.2:8000"
 
-    // Состояние для переключения между режимами
     var selectedMode by remember { mutableStateOf<InputMode?>(null) }
 
-    // Launcher для выбора файла
     val fileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -55,7 +53,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Заголовок
         Text(
             text = "Piano Roll Converter",
             fontSize = 26.sp,
@@ -71,7 +68,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Показываем результат если есть
         viewModel.transcriptionResult?.let { result ->
             ResultCard(
                 result = result,
@@ -80,7 +76,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Показываем ошибку если есть
         viewModel.errorMessage?.let { error ->
             ErrorCard(
                 message = error,
@@ -89,7 +84,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Индикатор загрузки
         AnimatedVisibility(
             visible = viewModel.isTranscribing,
             enter = fadeIn(),
@@ -99,11 +93,9 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Выбор режима ввода
         if (!viewModel.isTranscribing && viewModel.transcriptionResult == null) {
             when (selectedMode) {
                 null -> {
-                    // Начальный экран - выбор режима
                     Text(
                         text = "Choose input method",
                         fontSize = 16.sp,
@@ -134,7 +126,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
                 }
 
                 InputMode.FILE -> {
-                    // Режим файла
                     FileInputSection(
                         fileName = viewModel.selectedFileName,
                         fileSize = viewModel.selectedFileSize,
@@ -149,7 +140,6 @@ fun MainWindow(viewModel: MainViewModel = viewModel()) {
                 }
 
                 InputMode.YOUTUBE -> {
-                    // Режим YouTube
                     YoutubeInputSection(
                         link = viewModel.youtubeLink,
                         onLinkChange = { viewModel.updateYoutubeLink(it) },
@@ -233,7 +223,6 @@ private fun FileInputSection(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Кнопка назад
         TextButton(
             onClick = onBack,
             modifier = Modifier.align(Alignment.Start)
@@ -245,7 +234,6 @@ private fun FileInputSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Карточка с выбранным файлом или кнопка выбора
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -345,7 +333,6 @@ private fun YoutubeInputSection(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Кнопка назад
         TextButton(
             onClick = onBack,
             modifier = Modifier.align(Alignment.Start)
@@ -357,7 +344,6 @@ private fun YoutubeInputSection(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Карточка с полем ввода
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MenuBack),
@@ -473,7 +459,6 @@ private fun ResultCard(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Заголовок с информацией
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = ButtonPressedBack),
@@ -519,7 +504,6 @@ private fun ResultCard(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Дополнительная информация
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -539,7 +523,6 @@ private fun ResultCard(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Piano Roll отображение
         PianoRollView(
             notes = result.notes,
             modifier = Modifier

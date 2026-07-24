@@ -29,7 +29,6 @@ class AuthViewModel : ViewModel() {
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
 
     init {
-        // Check existing token
         viewModelScope.launch {
             val token = ServiceLocator.getAuthManager().getToken()
             _isAuthenticated.value = token != null && !token.isBlank()
@@ -58,7 +57,6 @@ class AuthViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val authResponse = response.body()
                     if (authResponse != null) {
-                        // Save token (expiration handling simplified in AuthManager)
                         ServiceLocator.getAuthManager().saveAuthResponse(authResponse)
                         _isAuthenticated.value = true
                     } else {

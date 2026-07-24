@@ -37,7 +37,6 @@ fun RecentScreen(
             .background(MenuVERYBack)
             .padding(20.dp)
     ) {
-        // Заголовок
         Text(
             text = "Recent Transcriptions",
             fontSize = 26.sp,
@@ -126,7 +125,6 @@ private fun TranscriptionCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Иконка источника
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -147,7 +145,6 @@ private fun TranscriptionCard(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Информация о транскрипции
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -182,7 +179,6 @@ private fun TranscriptionCard(
                     )
                 }
 
-                // Дополнительные метаданные
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -197,7 +193,6 @@ private fun TranscriptionCard(
                 }
             }
 
-            // Кнопка удаления
             IconButton(onClick = { showDeleteConfirm = true }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -208,7 +203,6 @@ private fun TranscriptionCard(
         }
     }
 
-    // Диалог подтверждения удаления
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },

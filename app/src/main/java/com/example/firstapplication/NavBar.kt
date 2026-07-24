@@ -37,7 +37,6 @@ import com.example.firstapplication.ui.theme.FirstApplicationTheme
 fun NavBar(modifier: Modifier = Modifier, viewModel: MainViewModel = viewModel()) {
     val context = LocalContext.current
 
-    // Инициализируем менеджер транскрипций
     LaunchedEffect(Unit) {
         viewModel.initTranscriptionsManager(context)
     }
@@ -79,7 +78,7 @@ fun NavBar(modifier: Modifier = Modifier, viewModel: MainViewModel = viewModel()
                     transcriptions = viewModel.savedTranscriptions.collectAsState().value,
                     onSelectTranscription = { transcription ->
                         viewModel.selectTranscription(transcription)
-                        selectedItem = 1 // Переходим на главный экран
+                        selectedItem = 1
                     },
                     onDeleteTranscription = { id ->
                         viewModel.deleteTranscription(id)

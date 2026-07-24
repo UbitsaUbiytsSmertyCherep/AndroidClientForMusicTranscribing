@@ -38,12 +38,9 @@ class MainActivity : ComponentActivity() {
                 val authViewModel = viewModel<AuthViewModel>()
                 val isAuthenticated by authViewModel.isAuthenticated.collectAsStateWithLifecycle()
                 if (isAuthenticated) {
-                    // Show main app
                     ScreenContent()
                 } else {
-                    // Show auth screen
                     AuthScreen(onAuthSuccess = {
-                        // When auth succeeds, recomposition will happen due to state change
                     })
                 }
             }
@@ -53,14 +50,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ScreenContent() {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            //InnerScreen(modifier = Modifier.padding(innerPadding))
-            //SideBar(modifier = Modifier.padding(innerPadding))
             NavBar(modifier = Modifier.padding(innerPadding))
         }
     }
 }
 
-// Preserving the original preview functions
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(

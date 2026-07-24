@@ -24,18 +24,14 @@ import com.example.firstapplication.ui.theme.MenuVERYBack
 import kotlin.math.max
 import kotlin.math.min
 
-// Диапазон MIDI нот для отображения
-private val NOTE_RANGE = 21..108 // A0 to C8
+private val NOTE_RANGE = 21..108
 
-// Константы для piano roll
 private const val PIXELS_PER_SECOND = 80
 private const val NOTE_HEIGHT_DP = 24
 private const val OCTAVE_LABEL_WIDTH_DP = 50
 
-// Список белых клавиш в октаве
 private val WHITE_NOTES = listOf("C", "D", "E", "F", "G", "A", "B")
 
-// Функция для преобразования названия ноты в MIDI номер
 fun noteToMidi(noteName: String): Int {
     val note = noteName.trim()
     val noteLetter = note.filter { it.isLetter() || it == '#' }
@@ -60,7 +56,6 @@ fun noteToMidi(noteName: String): Int {
     return noteNumber + (octave + 1) * 12
 }
 
-// Функция для MIDI номера в название ноты
 fun midiToNote(midiNumber: Int): String {
     val octave = (midiNumber / 12) - 1
     val noteNumber = midiNumber % 12
@@ -84,22 +79,20 @@ fun midiToNote(midiNumber: Int): String {
     return "$noteName$octave"
 }
 
-// Проверка, является ли нота белой клавишей
 fun isWhiteKey(noteName: String): Boolean {
     val noteLetter = noteName.filter { it.isLetter() || it == '#' }
     return noteLetter in listOf("C", "D", "E", "F", "G", "A", "B")
 }
 
-// Получить цвет ноты в зависимости от velocity
 fun getNoteColor(velocity: Int): Color {
     val normalized = velocity.coerceIn(0, 127) / 127f
 
     return when {
-        normalized >= 0.8f -> Color(0xFF4CAF50) // Ярко-зелёный
-        normalized >= 0.6f -> Color(0xFF8BC34A) // Светло-зелёный
-        normalized >= 0.4f -> Color(0xFF2196F3) // Синий
-        normalized >= 0.2f -> Color(0xFFFF9800) // Оранжевый
-        else -> Color(0xFFFFC107) // Янтарный
+        normalized >= 0.8f -> Color(0xFF4CAF50)
+        normalized >= 0.6f -> Color(0xFF8BC34A)
+        normalized >= 0.4f -> Color(0xFF2196F3)
+        normalized >= 0.2f -> Color(0xFFFF9800)
+        else -> Color(0xFFFFC107)
     }
 }
 
@@ -113,21 +106,17 @@ fun PianoRollView(
         return
     }
 
-    // Находим диапазон нот и времени
     val minNote = notes.minOf { noteToMidi(it.note) }
     val maxNote = notes.maxOf { noteToMidi(it.note) }
     val maxTime = notes.maxOf { it.time + it.duration }
 
-    // Добавляем отступы
     val noteRangeStart = max(NOTE_RANGE.first, minNote - 2)
     val noteRangeEnd = min(NOTE_RANGE.last, maxNote + 2)
     val totalWidthPx = ((maxTime + 2) * PIXELS_PER_SECOND).toInt()
 
-    // Состояния прокрутки
     val horizontalScrollState = rememberScrollState()
     val verticalScrollState = rememberScrollState()
 
-    // Плотность для конвертации px в dp
     val density = androidx.compose.ui.platform.LocalDensity.current
 
     Column(
@@ -135,10 +124,8 @@ fun PianoRollView(
             .fillMaxWidth()
             .background(MenuVERYBack)
     ) {
-        // Заголовок с информацией
         PianoRollHeader(notes = notes)
 
-        // Основная область с piano roll
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,13 +135,11 @@ fun PianoRollView(
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    // Вертикальная ось с названиями нот (синхронизированная прокрутка)
                     Box(
                         modifier = Modifier
                             .width(OCTAVE_LABEL_WIDTH_DP.dp)
                             .fillMaxHeight()
                     ) {
-                        // Скрываем лишнее при прокрутке
                         Box(
                             modifier = Modifier
                                 .offset {
@@ -172,7 +157,6 @@ fun PianoRollView(
                         }
                     }
 
-                    // Область с нотами (горизонтальная прокрутка)
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -184,7 +168,6 @@ fun PianoRollView(
                                 .fillMaxHeight()
                                 .verticalScroll(verticalScrollState)
                         ) {
-                            // Сетка и ноты
                             PianoRollGrid(
                                 notes = notes,
                                 noteRangeStart = noteRangeStart,
@@ -197,7 +180,6 @@ fun PianoRollView(
             }
         }
 
-        // Временная шкала снизу
         TimeAxis(
             maxTime = maxTime,
             scrollState = horizontalScrollState
@@ -286,7 +268,6 @@ private fun NoteLabelsColumn(
         modifier = modifier
             .background(MenuBack)
     ) {
-        // Отрисовываем метки нот от верхней к нижней
         for (midiNote in noteRangeEnd downTo noteRangeStart) {
             val noteName = midiToNote(midiNote)
             val isWhite = isWhiteKey(noteName)
@@ -335,7 +316,6 @@ private fun PianoRollGrid(
             .width(totalWidthPx.dp)
             .height((noteCount * NOTE_HEIGHT_DP).dp)
     ) {
-        // Фоновая сетка
         for (midiNote in noteRangeStart..noteRangeEnd) {
             val noteName = midiToNote(midiNote)
             val isWhite = isWhiteKey(noteName)
@@ -358,7 +338,6 @@ private fun PianoRollGrid(
             )
         }
 
-        // Вертиикальные линии сетки (каждую секунду)
         val secondsCount = (totalWidthPx / PIXELS_PER_SECOND) + 1
         for (second in 0..secondsCount) {
             val xPositionDp = second * PIXELS_PER_SECOND
@@ -372,7 +351,6 @@ private fun PianoRollGrid(
             )
         }
 
-        // Ноты
         notes.forEach { note ->
             val midiNote = noteToMidi(note.note)
             if (midiNote in noteRangeStart..noteRangeEnd) {
@@ -396,7 +374,6 @@ private fun PianoRollGrid(
                             )
                         )
                 ) {
-                    // Текст ноты внутри (если есть место)
                     if (note.duration > 0.2f) {
                         Text(
                             text = note.note,
